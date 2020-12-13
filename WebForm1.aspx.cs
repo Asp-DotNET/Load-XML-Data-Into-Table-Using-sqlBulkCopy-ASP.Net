@@ -20,11 +20,32 @@ namespace Load_XML_Data_Into_Table_Using_sqlBulkCopy_ASP.Net
         protected void Button1_Click(object sender, EventArgs e)
         {
             string cs = ConfigurationManager.ConnectionStrings["DBConnection"].ConnectionString;
-
-            using(SqlConnection con = new SqlConnection(cs))
+            using (SqlConnection con = new SqlConnection(cs))
             {
                 DataSet ds = new DataSet();
-                ds.ReadXml(Server.MapPath("~/data.xml"));
+                ds.ReadXml(Server.MapPath("~/XMLFile1.xml"));
+
+                DataTable dtDept = ds.Tables["Department"];
+                DataTable dtEmp = ds.Tables["Employee"];
+                con.Open();
+                using (SqlBulkCopy bc = new SqlBulkCopy(con))
+                {
+                    bc.DestinationTableName = "Departments";
+                    bc.ColumnMappings.Add("ID", "ID");
+                    bc.ColumnMappings.Add("Name", "Name");
+                    bc.ColumnMappings.Add("Location", "Location");
+                    bc.WriteToServer(dtDept);
+                }
+
+                using (SqlBulkCopy bc = new SqlBulkCopy(con))
+                {
+                    bc.DestinationTableName = "Employees";
+                    bc.ColumnMappings.Add("ID", "ID");
+                    bc.ColumnMappings.Add("Name", "Name");
+                    bc.ColumnMappings.Add("Gender", "Gender");
+                    bc.ColumnMappings.Add("DepartmentId", "DepartmentId");
+                    bc.WriteToServer(dtEmp);
+                }
             }
         }
     }
